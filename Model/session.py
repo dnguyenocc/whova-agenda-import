@@ -1,6 +1,7 @@
-class SessionType:
-    SESSION = "Session"
-    SUBSESSION = "Sub"
+from enum import Enum
+class SessionType(Enum):
+    Session = 1
+    Sub = 2
 
 
 class Session:
@@ -8,33 +9,19 @@ class Session:
     DATE = "date"
     START_TIME = "start_time"
     END_TIME = "end_time"
+    TYPE = "type"
     TITLE = "title"
     LOCATION = "location"
     DESCRIPTION = "description"
-
-    def __init__(self,date,start_time,end_time,title,location="",description=""):
-        self.data = {
-            Session.DATE: date,
-            Session.START_TIME: start_time,
-            Session.END_TIME: end_time,
-            Session.TITLE: title,
-            Session.LOCATION: location,
-            Session.DESCRIPTION: description
-        }
-
-    def add_speaker(self, speaker_name):
-        self.speakers.add(speaker_name)
-
-    def set_session_type(self, session_type):
-        self.session_type = session_type
-
+    SPEAKER = "speaker"
 
     def get_schema():
         return {
-            "id": "integer PRIMARY KEY",
+            "id": "integer PRIMARY KEY AUTOINCREMENT",
             "date": "date",
             "start_time": "datetime",
             "end_time": "datetime",
+            "type": "integer",
             "title": "text",
             "location": "text",
             "description": "text"

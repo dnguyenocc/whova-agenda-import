@@ -20,24 +20,28 @@ def import_agenda(filename):
 
     df = pd.read_excel(filename,skiprows=[i for i in range(0,14)])
     df = df.fillna('')
-    session_table = db_table.create_table("sessions", Session.get_schema());
-    speaker_table = db_table.create_table("speaker", Speaker.get_schema());
-    subsession_table = db_table.create_table("subsessions", Subsession.get_schema());
-    presentation_table = db_table.create_table("presentation", Presentation.get_schema());
+    session_table = db_table("sessions", Session.get_schema());
+    speaker_table = db_table("speaker", Speaker.get_schema());
+    subsession_table = db_table("subsessions", Subsession.get_schema());
+    presentation_table = db_table("presentation", Presentation.get_schema());
 
     speaker_dict = {}
     parent_session_id = None
     for _index, row in df.iterrows():
+        if row[SESSION_TYPE_COL_IDX] not in SessionType.__members__:
+            continue
+        session_type = SessionType[row[SESSION_TYPE_COL_IDX]].value
         session_id = session_table.insert({
             Session.DATE: row[DATE_COL_IDX],
             Session.START_TIME: row[START_TIME_COL_IDX],
             Session.END_TIME: row[END_TIME_COL_IDX],
+            Session.TYPE: session_type,
             Session.TITLE: row[SESSION_TITLE_COL_IDX],
             Session.LOCATION: row[LOCATION_COL_IDX],
             Session.DESCRIPTION: row[DESCRIPTION_COL_INDEX],
         })
 
-        if row[SESSION_TYPE_COL_IDX] == SessionType.SUBSESSION:
+        if session_type == SessionType.Sub.value:
             assert parent_session_id != None
             subsession_id = subsession_table.insert(
                 {
@@ -65,5 +69,6 @@ def import_agenda(filename):
                     }
                 )
 
-
-        
+filename = sys.argv[1]
+print(sys.argv)
+import_agenda(filename)

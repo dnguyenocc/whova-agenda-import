@@ -4,6 +4,6 @@ class Speaker:
 
     def get_schema():
         return {
-            "id": "integer PRIMARY KEY",
+            "id": "integer PRIMARY KEY AUTOINCREMENT",
             "name": "text"
         }

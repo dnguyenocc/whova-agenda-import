@@ -15,6 +15,8 @@ class db_table:
     # SQLite database filename
     DB_NAME = "interview_test.db"
 
+    def values(v):
+        return v.replace("'","''") if type(v) == str else v
     #
     # model initialization
     # records table name and schema
@@ -48,7 +50,7 @@ class db_table:
     #
     def create_table(self):
         # { "id": "integer", "name": "text" } -> "id integer, name text"
-        columns_query_string = ', '.join([ "%s %s" % (k,v) for k,v in self.schema.iteritems() ])
+        columns_query_string = ', '.join([ "%s %s" % (k,v) for k,v in iter(self.schema.items())])
 
         # CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY, name text)
         #
@@ -81,7 +83,7 @@ class db_table:
         query                = "SELECT %s FROM %s" % (columns_query_string, self.name)
         # build where query string
         if where:
-            where_query_string = [ "%s = '%s'" % (k,v) for k,v in where.iteritems() ]
+            where_query_string = [ "%s = '%s'" % (k,v) for k,v in iter(where.items())]
             query             += " WHERE " + ' AND '.join(where_query_string)
         
         result = []
@@ -112,7 +114,7 @@ class db_table:
     def insert(self, item):
         # build columns & values queries
         columns_query = ", ".join(item.keys())
-        values_query  = ", ".join([ "'%s'" % v for v in item.values()])
+        values_query  = ", ".join([ "'%s'" % db_table.values(v) for v in item.values()])
         #print(len(item.values()))
         #print(item["Speakers"])
         # INSERT INTO users(id, name) values (42, John)
@@ -121,6 +123,7 @@ class db_table:
         # The reason is that sqlite does not provide substitution mechanism for columns parameters
         # In the context of this project, this is fine (no risk of user malicious input)
         cursor = self.db_conn.cursor()
+        print("INSERT INTO %s (%s) VALUES (%s)" % (self.name, columns_query, values_query))
         cursor.execute("INSERT INTO %s (%s) VALUES (%s)" % (self.name, columns_query, values_query))
         cursor.close()
         self.db_conn.commit()
@@ -139,8 +142,8 @@ class db_table:
     #
     def update(self, values, where):
         # build set & where queries
-        set_query   = ", ".join(["%s = '%s'" % (k,v) for k,v in values.iteritems()])
-        where_query = " AND ".join(["%s = '%s'" % (k,v) for k,v in where.iteritems()])
+        set_query   = ", ".join(["%s = '%s'" % (k,db_table.values(v)) for k,v in iter(values.items())])
+        where_query = " AND ".join(["%s = '%s'" % (k,db_table.values(v)) for k,v in iter(where.items())])
 
         # UPDATE users SET name = Simon WHERE id = 42
         #
